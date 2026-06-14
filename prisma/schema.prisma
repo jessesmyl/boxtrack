@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  // SQLite for fast local dev. Swap provider to "postgresql" for production.
-  provider = "sqlite"
+  // Postgres in production (Railway). Local dev points DATABASE_URL at the same
+  // managed Postgres (or a local one) — see DEPLOY.md.
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
