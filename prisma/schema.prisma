@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // SQLite for fast local dev. Swap provider to "postgresql" for production.
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Move {
+  id         String    @id @default(cuid())
+  clientName String
+  market     String    @default("ON") // "AB" Fast Track Movers | "ON" Fast Track Muskoka
+  fromAddr   String?
+  toAddr     String?
+  homeSize   String? // "1-bed" | "2-bed" | "3-bed" | "4-bed+"
+  moveDate   DateTime?
+  status     String    @default("active") // active | completed
+  createdAt  DateTime  @default(now())
+  boxes      Box[]
+}
+
+model Box {
+  id        String   @id // short nanoid encoded in the QR sticker
+  moveId    String
+  move      Move     @relation(fields: [moveId], references: [id], onDelete: Cascade)
+  label     Int // human-friendly sequential number within the move
+  room      String?
+  category  String? // Kitchen | Books | Clothes | Electronics | Garage | Bathroom | Decor | Misc
+  fragile   Boolean  @default(false)
+  fillLevel String? // quarter | half | threequarter | full
+  notes     String? // voice-to-text transcription
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  photos    Photo[]
+  items     Item[]
+
+  @@unique([moveId, label])
+}
+
+model Item {
+  id        String   @id @default(cuid())
+  boxId     String
+  box       Box      @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  boxId     String
+  box       Box      @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  url       String
+  createdAt DateTime @default(now())
+}
